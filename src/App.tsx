@@ -1,40 +1,29 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import { Admin, Resource } from 'react-admin';
-import buildHasuraProvider from 'ra-data-hasura';
-import { ApolloClient, InMemoryCache } from '@apollo/client';
-import { buildDataProvider } from './components/Provider/hasuraProvider'
-import authProvider from './components/Provider/authProvider'
-//browse history
-import { createBrowserHistory as createHistory } from 'history';
-import { AnioGludList, AnioGludCreate } from  './components/general/AnioGlud/index'
-const history = createHistory();
-
-
+import { buildDataProvider } from './components/Provider/hasuraProvider';
+import authProvider from './components/Provider/authProvider';
+import inMemoryJWT from './components/Provider/inMemoryJwt';
+import { AnioGludList, AnioGludCreate } from './components/general/AnioGlud/index';
+import { CargoList, CargoCreate, CargoEdit } from './components/general/Cargo/index';
 
 function App() {
-  const [dataProvider, setDataProvider] = useState(null);
- 
-  useEffect(() => {
-    const buildDataProvider = async () => {
-      const dataProvider:any = await buildDataProvider();
-      setDataProvider(()=> dataProvider);
-    };
-    buildDataProvider();
-  }, []);
+  //const [dataProvider, setDataProvider] = useState<any>(null);
 
-  if (!dataProvider) return <p>Loading...</p>;
+  // useEffect(() => {
+  //   const dataProvider = async () => {
+  //     //const isAuthenticated = inMemoryJWT.isAuthenticated();
+
+  //     const hasuraProvider = await buildDataProvider();
+  //     setDataProvider(() => hasuraProvider);
+  //   };
+  //   dataProvider();
+  // }, []);
+
+  //if (!dataProvider) return <p>Loading...</p>;
   return (
-    <Admin 
-      title="Gludim"
-      authProvider={authProvider}
-      dataProvider={dataProvider}
-      
-    >
-      <Resource
-          name="generalschema_anioglud"
-          list={AnioGludList}
-          create={AnioGludCreate}
-      />
+    <Admin title="Gludim" authProvider={authProvider} dataProvider={buildDataProvider}>
+      <Resource name="generalschema_anioglud" list={AnioGludList} create={AnioGludCreate} />
+      <Resource name="generalschema_cargo" list={CargoList} create={CargoCreate} edit={CargoEdit} />
     </Admin>
   );
 }

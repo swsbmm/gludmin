@@ -1,7 +1,12 @@
 import inMemoryJWT from './inMemoryJwt';
 
+type credentials = {
+    username : string,
+    password : string
+}
+
 const authProvider = {
-    login: ({ username, password }: {[x: string]: string}) => {
+    login: ({ username, password }: credentials) => {
         const request = new Request('https://auth.glud.org/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email: username, password: password }),
@@ -9,28 +14,32 @@ const authProvider = {
         });
         return fetch(request)
             .then((response) => {
-                console.log(response);
                 if (response.status < 200 || response.status >= 300) {
                     throw new Error(response.statusText);
-                    
                 }
                 return response.json();
             })
-            .then(({ token }) => inMemoryJWT.setToken(token));
+            .then(({jwt_token}) => {
+                inMemoryJWT.setToken(jwt_token);
+                return Promise.resolve();
+            })
+            .catch(() => {
+                throw new Error('Error, verifique credenciales')
+            });
     },
     logout: () => {
-        inMemoryJWT.ereaseToken();
-        return Promise.resolve();
+        inMemoryJWT.eraseToken();
+        return Promise.resolve('/login');
     },
 
     checkAuth: () => {
-        return inMemoryJWT.getToken() ? Promise.resolve() : Promise.reject();
+        return inMemoryJWT.isAuthenticated() ? Promise.resolve() : Promise.reject();
     },
 
     checkError: (error:any) => {
         const status = error.status;
         if (status === 401 || status === 403) {
-            inMemoryJWT.ereaseToken();
+            inMemoryJWT.eraseToken();
             return Promise.reject();
         }
         return Promise.resolve();

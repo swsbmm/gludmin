@@ -8,14 +8,14 @@ import inMemoryJWT from './inMemoryJwt';
 const hasuraUrl = "https://graphql.glud.org/v1/graphql";
 
 //Funcion que ensambla el dataProvider con configuracion personalizada.
-const creatApolloClient = async(token: any) => {
+const creatApolloClient = async(token: string) => {
     return new ApolloClient({
       uri: hasuraUrl,
       cache: new InMemoryCache(),
       headers: {
         'content-type': "content-type",
-        'x-hasura-admin-secret': 'gludsecretkey',
-        //'Authorization': `Bearer ${token}`,
+        //'x-hasura-admin-secret': 'gludsecretkey',
+        'Authorization': `Bearer ${token}`,
         //'x-Hasura-Role': 'me'
       }
     })
@@ -24,8 +24,7 @@ const creatApolloClient = async(token: any) => {
 
 
 const buildDataProvider = async () => {
-  const token = inMemoryJWT.getToken();
-  console.log(token);
+  const token = await inMemoryJWT.getToken();
   const apolloClient = await creatApolloClient(token);
   const dataProvider = await hasuraDataProvider(
     {
