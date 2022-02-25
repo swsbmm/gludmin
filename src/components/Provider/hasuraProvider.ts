@@ -1,11 +1,15 @@
+
 //Imports funcionales
 import hasuraDataProvider from 'ra-data-hasura';
 //Personalizando cliente:
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 import inMemoryJWT from './inMemoryJwt';
+//importando instrospection
+import data from '../../xd.json';
 //variables de configuracion:
 
 const hasuraUrl = "https://graphql.glud.org/v1/graphql";
+
 
 //Funcion que ensambla el dataProvider con configuracion personalizada.
 const creatApolloClient = async(token: string) => {
@@ -13,7 +17,7 @@ const creatApolloClient = async(token: string) => {
       uri: hasuraUrl,
       cache: new InMemoryCache(),
       headers: {
-        'content-type': "content-type",
+        'content-type': "application/json",
         //'x-hasura-admin-secret': 'gludsecretkey',
         'Authorization': `Bearer ${token}`,
         //'x-Hasura-Role': 'me'
@@ -23,12 +27,16 @@ const creatApolloClient = async(token: string) => {
 };
 
 
-const buildDataProvider = async () => {
-  const token = await inMemoryJWT.getToken();
-  const apolloClient = await creatApolloClient(token);
-  const dataProvider = await hasuraDataProvider(
+const buildDataProvider =  async() => {
+  const token = inMemoryJWT.getToken();
+  const apolloClient =  await creatApolloClient(token);
+  //const data = require('../../schema.json');
+  console.log(data);
+  const introspection = data.data.__schema;
+  const dataProvider =  await hasuraDataProvider(
     {
       client: apolloClient,
+      introspection:{ schema: introspection }
     }
   );
   return dataProvider;
@@ -37,4 +45,3 @@ const buildDataProvider = async () => {
 
 
 export  { buildDataProvider };
-
